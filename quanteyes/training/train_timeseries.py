@@ -58,7 +58,7 @@ val_dataset = OpenEDSDataset(
 val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=32, shuffle=True)
 
 # Define your optimizer and loss function
-model = CNNLSTMModel("quanteyes/training/saved/resnet18_500.pth", train_backbone=False, seq_len=5).to("cuda")
+model = CNNLSTMModel("quanteyes/training/saved/resnet18_500.pth", train_backbone=False, seq_len=5, output_len=2).to("cuda")
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 criterion = nn.MSELoss()
 
