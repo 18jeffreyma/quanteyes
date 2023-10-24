@@ -18,17 +18,19 @@ def train(model, optimizer, criterion, train_loader):
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()
+        print(f"iteration: {batch_idx}, loss: {loss.item()}")
 
 # Define your data loading and preprocessing
 train_path = "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction/train"
 train_dataset = OpenEDSDataset(
     os.path.join(train_path, "sequences"), 
     os.path.join(train_path, "labels"),
-    inference=False)
+    inference=False,
+    device="cuda")
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
 
 # Define your optimizer and loss function
-model = ResNet18(64, 0.5)
+model = ResNet18(64, 0.5).to("cuda")
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 criterion = nn.MSELoss()
 

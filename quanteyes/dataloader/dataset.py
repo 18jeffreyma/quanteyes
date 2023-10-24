@@ -12,9 +12,9 @@ import torch
 from functools import lru_cache
 
 @lru_cache(maxsize=128)
-def read_image_to_tensor(image_path: str) -> torch.Tensor:
+def read_image_to_tensor(image_path: str, device: str = "cpu") -> torch.Tensor:
     # Read image to PyTorch tensor
-    img = io.read_image(image_path)
+    img = io.read_image(image_path).to(device)
 
     # Normalize to [0, 1]
     img = img.float() / 255.0
@@ -30,13 +30,15 @@ class OpenEDSDataset(Dataset):
         data_dir: str, 
         label_dir: Optional[str] = None,
         input_output_lengths: Optional[tuple] = None,
-        inference: bool = False
+        inference: bool = False,
+        device: str = "cpu"
     ):
         self.data_dir = data_dir
         self.label_dir = label_dir
         self.inference = inference
         
         self.input_output_lengths = input_output_lengths
+        self.device = device
         
         data_paths, labels = self._get_data_paths(self.data_dir, self.label_dir, inference=inference)
         
@@ -114,14 +116,14 @@ class OpenEDSDataset(Dataset):
         
         data = None
         if isinstance(path_or_paths, str):
-            data = read_image_to_tensor(path_or_paths)
+            data = read_image_to_tensor(path_or_paths, device=self.device)
         else:
-            data = torch.stack([read_image_to_tensor(path) for path in path_or_paths], dim=0)
+            data = torch.stack([read_image_to_tensor(path, device=self.device) for path in path_or_paths], dim=0)
 
         if self.inference:
             return data
 
-        labels = torch.Tensor(self.labels[idx])
+        labels = torch.Tensor(self.labels[idx]).to(device=self.device)
         return data, labels
 
 if __name__ == "__main__":

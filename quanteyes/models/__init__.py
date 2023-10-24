@@ -1,1 +1,1 @@
-from .resnet18 import ResNet18
+from .backbone.resnet18 import ResNet18
