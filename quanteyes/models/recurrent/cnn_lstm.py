@@ -3,7 +3,7 @@ import torch.nn as nn
 
 class CNNLSTMModel(nn.Module):
     def __init__(self, static_model_path, train_backbone=False, seq_len=50):
-        super(CNNLSTMModel, self).__init()
+        super(CNNLSTMModel, self).__init__()
 
         # Loading our pre-trained static backbone model (assuming it's a PyTorch model)
         self.resnet_no_top = torch.load(static_model_path)
@@ -25,15 +25,18 @@ class CNNLSTMModel(nn.Module):
         self.fc_2 = nn.Linear(64, 3)
 
     def forward(self, x):
+        print(x.shape)
         # Input shape: (batch_size, seq_len, 400, 640, 1)
         batch_size, seq_len, _, _, _ = x.size()
         
         # Reshape the input
-        x = x.view(batch_size * seq_len, 1, 400, 640)
+        x = x.view(batch_size * seq_len, 3, 400, 640)
         
         # Pass through the static backbone
         x = self.resnet_no_top(x)
         x = x.view(batch_size, seq_len, -1)
+        
+        # TODO: jeff confused about this part
         
         # Pass through the LSTM encoder
         x, _ = self.lstm_enc(x)
@@ -44,7 +47,7 @@ class CNNLSTMModel(nn.Module):
         x = x.view(batch_size, seq_len, -1)
         
         # Pass through fully connected layers
-        x = x.view(batch_size * seq_len, -1)
+        x = x.view(batch_size, seq_len, -1)
         x = self.fc_1(x)
         x = self.fc_2(x)
         

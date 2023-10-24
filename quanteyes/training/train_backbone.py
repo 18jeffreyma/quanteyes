@@ -9,19 +9,6 @@ from quanteyes.models import ResNet18
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-def test(model, test_loader):
-    model.eval()
-    correct = 0
-    total = 0
-    with torch.no_grad():
-        for data, target in test_loader:
-            output = model(data)
-            _, predicted = torch.max(output.data, 1)
-            total += target.size(0)
-            correct += (predicted == target).sum().item()
-    accuracy = 100 * correct / total
-    print(f"Accuracy: {accuracy:.2f}%")
-
 # Define your training loop
 def train(model, optimizer, criterion, train_loader, test_loader):
     model.train()
@@ -33,12 +20,21 @@ def train(model, optimizer, criterion, train_loader, test_loader):
         optimizer.step()
         print(f"iteration: {batch_idx}, loss: {loss.item()}")
         
-        if (batch_idx + 1) % 20 == 0:
+        if (batch_idx + 1) % 250 == 0:
             model.eval()
-            test(model, test_loader)
-            torch.save(model.state_dict(), f"quanteyes/training/saved/resnet18_{batch_idx + 1}.pth")
-            model.train()
+            with torch.no_grad():
+                total_count = 0
+                total_loss = 0.
+                for data, target in test_loader:
+                    if (total_count == 20):
+                        break
+                    output = model(data)
+                    total_loss += criterion(output, target)
+                    total_count += 1
+                print(f"validation loss: {total_loss/total_count}")
 
+            torch.save(model, f"quanteyes/training/saved/resnet18_{batch_idx + 1}.pth")
+            model.train()
 
 # Define your data loading and preprocessing
 train_path = "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction/train"

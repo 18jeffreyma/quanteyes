@@ -11,7 +11,7 @@ import torch
 
 from functools import lru_cache
 
-@lru_cache(maxsize=128)
+@lru_cache(maxsize=32)
 def read_image_to_tensor(image_path: str, device: str = "cpu") -> torch.Tensor:
     # Read image to PyTorch tensor
     img = io.read_image(image_path).to(device)
