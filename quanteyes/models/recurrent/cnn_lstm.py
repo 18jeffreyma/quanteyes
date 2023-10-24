@@ -34,16 +34,11 @@ class CNNLSTMModel(nn.Module):
         x = x.view(batch_size, seq_len, -1)
         
         # Pass through LSTM encoder 
-        print(f"before encoder: {x.shape}")
         x, _ = self.lstm_enc(x)
-        print(f"after encoder: {x.shape}")
         x = x.unsqueeze(1).repeat(1, self.output_len, 1, 1)
         x = x.view(batch_size, self.output_len, seq_len * 128)
         
-        print(f"after unsqueeze: {x.shape}")
         x, _ = self.lstm_dec(x)
         x = self.fc(x)
-        
-        print(f"after decoder: {x.shape}")
 
         return x
