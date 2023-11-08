@@ -36,7 +36,7 @@ def train(model, optimizer, criterion, train_loader, test_loader):
                 print(f"validation loss: {total_loss/total_count}")
 
             torch.save(
-                model,
+                model.state_dict(),
                 f"quanteyes/training/saved/{model.__class__.__name__}_{batch_idx + 1}.pth",
             )
             model.train()
