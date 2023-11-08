@@ -8,7 +8,7 @@ from quanteyes.models import ResNet18
 
 import logging
 
-from quanteyes.models.recurrent.cnn_lstm import CNNLSTMModel
+from quanteyes.models.recurrent.cnn_lstm_v2 import CNNLSTMModelV2
 logging.basicConfig(level=logging.DEBUG)
 
 # Define your training loop
@@ -35,7 +35,7 @@ def train(model, optimizer, criterion, train_loader, test_loader):
                     total_count += 1
                 print(f"validation loss: {total_loss/total_count}")
 
-            torch.save(model.state_dict(), f"quanteyes/training/saved/resnet18_{batch_idx + 1}.pth")
+            torch.save(model.state_dict(), f"quanteyes/training/saved/cnn_lstm_v2_{batch_idx + 1}.pth")
             model.train()
 
 # Define your data loading and preprocessing
@@ -58,8 +58,9 @@ val_dataset = OpenEDSDataset(
 val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=32, shuffle=True)
 
 # Define your optimizer and loss function
-model = CNNLSTMModel("quanteyes/training/saved/resnet18_500.pth", train_backbone=False, seq_len=5, output_len=2).to("cuda")
+model = CNNLSTMModelV2("quanteyes/training/saved/SimpleCNN_250.pth", train_backbone=False, seq_len=5, output_len=2).to("cuda")
 optimizer = optim.Adam(model.parameters(), lr=0.001)
+
 criterion = nn.MSELoss()
 
 # Train your model
