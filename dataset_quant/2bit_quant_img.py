@@ -12,9 +12,10 @@ from torchvision import io
 from torchvision import utils
 import cv2
 from PIL import Image
+from octree_color_quantizer.octree_quantizer import OctreeQuantizer, Color
 
 data_dir = '/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction/'
-out_dir = '/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction-2bit/'
+out_dir = '/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction-1bit-edge/'
 directories = os.listdir(data_dir)
 
 def uniform_quant(img):
@@ -66,7 +67,7 @@ def peak_quant(img):
 	# plt.imshow(img_q, cmap='gray')
 	# plot_hist(img_q)
 
-def kmeans_quant(img):
+def kmeans_quant(img, bits=2):
 	temp = img.clone().numpy()
 	temp = np.array([temp, np.zeros_like(temp), np.zeros_like(temp)])
 	z = temp.reshape((-1,3))
@@ -76,7 +77,7 @@ def kmeans_quant(img):
 
 	# define criteria, number of clusters(K) and apply kmeans()
 	criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-	K = 4
+	K = 2**bits
 	ret,label,center=cv2.kmeans(z,K,None,criteria,10,cv2.KMEANS_PP_CENTERS)
 
 	# Convert back into uint8, and make original image
@@ -85,7 +86,41 @@ def kmeans_quant(img):
 	res2 = res.reshape((temp.shape))[0]
 	return res2
 
-def quantize(datatype_dir, directory, quant_scheme='kmeans'):
+def octree_quant(image, bits=2):
+	image = Image.fromarray(image.numpy())
+	pixels = image.load()
+	width, height = image.size
+
+	octree = OctreeQuantizer()
+
+	# add colors to the octree
+	for j in range(height):
+		for i in range(width):
+			octree.add_color(Color(red = int(pixels[i, j])))
+
+	# 256 colors for 8 bits per pixel output image
+	palette = octree.make_palette(2**bits)
+
+	# save output image
+	out_image = Image.new('RGB', (width, height))
+	out_pixels = out_image.load()
+	for j in range(height):
+		for i in range(width):
+			index = octree.get_palette_index(Color(red = int(pixels[i, j])))
+			color = palette[index]
+			out_pixels[i, j] = (int(color.red), int(color.green), int(color.blue))
+	out_image = np.array(out_image)[:, :, 0]
+	out_image = np.where(out_image == out_image.max(), 255, out_image).astype(np.uint8)
+	out_image = np.where(out_image == out_image.min(), 0, out_image).astype(np.uint8)
+	return torch.tensor(out_image)
+
+def canny_quant(img):
+	img = cv2.GaussianBlur(img.numpy(), (11,11), 0)
+	img = cv2.Canny(image=img, threshold1=15, threshold2=22) 
+	return torch.tensor(img)
+
+
+def quantize(datatype_dir, directory, quant_scheme='edge', bits=2):
 	for img_file in os.listdir(os.path.join(datatype_dir, directory)):
 		img_path = os.path.join(datatype_dir, directory, img_file)
 		img = io.read_image(img_path).to(torch.uint8)[0]
@@ -101,9 +136,16 @@ def quantize(datatype_dir, directory, quant_scheme='kmeans'):
 				img = peak_quant(img)
 
 			case 'kmeans':
-				img = kmeans_quant(img)
+				img = kmeans_quant(img, bits=bits)
+
+			case 'octree':
+				img = octree_quant(img, bits=bits)
+
+			case 'edge':
+				img = canny_quant(img)
 				
 		img = np.where(img == img.max(), 255, img).astype(np.uint8)
+		assert(np.unique(img).shape[0] <= 2**bits)
 
 		out_temp_dir = os.path.join(out_dir, data_type, 'sequences', directory)
 		print(img_file, out_temp_dir)
