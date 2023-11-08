@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torchvision.models as models
 
+
 class ResNet18(nn.Module):
     def __init__(self, fc1_units, drop_out):
         super(ResNet18, self).__init__()
