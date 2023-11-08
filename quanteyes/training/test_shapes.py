@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 # Define your Encoder
 class Encoder(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers):
@@ -12,6 +13,7 @@ class Encoder(nn.Module):
     def forward(self, x):
         encoder_outputs, (hidden, cell) = self.lstm(x)
         return encoder_outputs, hidden, cell
+
 
 # Define your Decoder
 class Decoder(nn.Module):
@@ -32,6 +34,7 @@ class Decoder(nn.Module):
         decoder_output, (hidden, cell) = self.lstm(embedded, (hidden, cell))
         output = self.fc(decoder_output.squeeze(1))
         return output, hidden, cell
+
 
 # Initialize your encoder and decoder
 input_size = 100  # Vocabulary size of input language
