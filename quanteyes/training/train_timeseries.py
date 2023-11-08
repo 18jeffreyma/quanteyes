@@ -44,7 +44,9 @@ def train(model, optimizer, criterion, train_loader, test_loader):
 
 
 # Define your data loading and preprocessing
-train_path = "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction/train"
+# train_path = "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction/train"
+base_path = "/data/openEDS2020-GazePrediction-2bit"
+train_path = f"{base_path}/train"
 train_dataset = OpenEDSDataset(
     os.path.join(train_path, "sequences"),
     os.path.join(train_path, "labels"),
@@ -54,7 +56,7 @@ train_dataset = OpenEDSDataset(
 )
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
 
-val_path = "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction/validation"
+val_path = f"{base_path}/validation"
 val_dataset = OpenEDSDataset(
     os.path.join(train_path, "sequences"),
     os.path.join(train_path, "labels"),
