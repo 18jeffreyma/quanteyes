@@ -6,7 +6,6 @@ import torch.nn as nn
 import torch.optim as optim
 
 from quanteyes.dataloader.dataset import OpenEDSDataset
-from quanteyes.models import ResNet18
 from quanteyes.models.backbone.simple_cnn import SimpleQuantizedCNN
 
 logging.basicConfig(level=logging.DEBUG)
