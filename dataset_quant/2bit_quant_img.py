@@ -18,6 +18,95 @@ data_dir = '/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction/'
 out_dir = '/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction-1bit-edge/'
 directories = os.listdir(data_dir)
 
+
+class KDTree:
+    def __init__(self, root, left = None, right = None):
+        self.root = root
+        self.left = left
+        self.right = right
+    
+    def set_left(self, left):
+        self.left = left
+    
+    def set_right(self, right):
+        self.right = right
+
+    def count_leaves(self):
+        # print(self.root)
+        if self.root is None:
+            return 0
+        if self.left is None and self.right is None:
+            # print(self.root.thresh)
+            return 1
+        left = self.left.count_leaves()
+        right = self.right.count_leaves()
+        return left + right
+
+class Partition:
+    def __init__(self,img):
+        self.image = img
+        self.left = None
+        self.right = None
+        self.thresh = None
+        self.priority = None
+
+    def find_optimal_split(self):
+        var = np.var(self.image)
+
+        # split pixels according to partition otsu
+        self.thresh = filters.threshold_otsu(self.image)
+        self.left = np.asarray([i for i in self.image if  i <= self.thresh])
+        self.right = np.asarray([i for i in self.image if i > self.thresh])
+
+        left_var = np.var(self.left)
+        right_var = np.var(self.right)
+        self.priority = var - (left_var + right_var)
+
+    def split(self):
+        return Partition(self.left), Partition(self.right)
+
+def min_var_quant(img, bits):
+
+    leaves = 2**bits
+    root_part = Partition(img.flatten())
+    root = KDTree(root_part)
+    root_part.find_optimal_split()
+
+    q = PriorityQueue()
+    q.put((-1 * root_part.priority, [root, root_part]))
+
+    while(root.count_leaves() != leaves):
+        item = q.get()[1]
+        node = item[0]
+        part = item[1]
+
+        left_part, right_part = part.split()
+
+        left_node = KDTree(left_part)
+        right_node = KDTree(right_part)
+
+        node.set_left(left_node)
+        node.set_right(right_node)
+
+        right_part.find_optimal_split()
+        q.put((-1 * right_part.priority, [right_node, right_part]))
+
+        left_part.find_optimal_split()
+        q.put((-1 * left_part.priority, [left_node , left_part]))
+
+    def thresh(elem, root):
+        if root.left is None and root.right is None:
+            return root.root.thresh
+        elif elem <= root.root.thresh:
+            return thresh(elem, root.left)
+        else:
+            return thresh(elem,root.right)
+    
+    thresh_img = np.vectorize(thresh)(img, root)
+    
+
+    return thresh_img
+
 def uniform_quant(img):
 	img = torch.where(img >= 0b10100000, 0b11000000, img)
 	img = torch.where((img >= 0b01100000) & (img < 0b10100000), 0b10000000, img)
@@ -143,6 +232,9 @@ def quantize(datatype_dir, directory, quant_scheme='edge', bits=2):
 
 			case 'edge':
 				img = canny_quant(img)
+
+			case 'min_var_quant':
+				img = min_var_quant(img, bits=bits)
 				
 		img = np.where(img == img.max(), 255, img).astype(np.uint8)
 		assert(np.unique(img).shape[0] <= 2**bits)
