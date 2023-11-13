@@ -36,33 +36,34 @@ def train(model, optimizer, criterion, train_loader, test_loader):
                 print(f"validation loss: {total_loss/total_count}")
 
             torch.save(
-                model,
+                model.state_dict(),
                 f"quanteyes/training/saved/{model.__class__.__name__}_{batch_idx + 1}.pth",
             )
             model.train()
 
 
 # Define your data loading and preprocessing
-train_path = "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction-2bit/train"
+base_path = "/data/openEDS2020-GazePrediction-2bit"
+train_path = f"{base_path}/train"
 train_dataset = OpenEDSDataset(
     os.path.join(train_path, "sequences"),
     os.path.join(train_path, "labels"),
     inference=False,
-    device="cpu",
+    device="cuda",
 )
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True)
 
-val_path = "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction-2bit/train"
+val_path = f"{base_path}/validation"
 val_dataset = OpenEDSDataset(
     os.path.join(train_path, "sequences"),
     os.path.join(train_path, "labels"),
     inference=False,
-    device="cpu",
+    device="cuda",
 )
-val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=32, shuffle=True)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=16, shuffle=True)
 
 # Define your optimizer and loss function
-model = SimpleQuantizedCNN().to("cpu")
+model = SimpleQuantizedCNN().to("cuda")
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 criterion = nn.MSELoss()
 
