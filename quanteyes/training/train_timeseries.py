@@ -6,8 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from quanteyes.dataloader.dataset import OpenEDSDataset
-from quanteyes.models import ResNet18
-from quanteyes.models.recurrent.cnn_lstm_v2 import CNNLSTMModelV2
+from quanteyes.models.recurrent.cnn_lstm_v2 import QuantizedCNNLSTMModelV2
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -44,7 +43,9 @@ def train(model, optimizer, criterion, train_loader, test_loader):
 
 
 # Define your data loading and preprocessing
-train_path = "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction/train"
+# train_path = "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction/train"
+base_path = "/data/openEDS2020-GazePrediction-2bit"
+train_path = f"{base_path}/train"
 train_dataset = OpenEDSDataset(
     os.path.join(train_path, "sequences"),
     os.path.join(train_path, "labels"),
@@ -52,9 +53,9 @@ train_dataset = OpenEDSDataset(
     input_output_lengths=(5, 2),
     device="cuda",
 )
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=8, shuffle=True)
 
-val_path = "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction/validation"
+val_path = f"{base_path}/validation"
 val_dataset = OpenEDSDataset(
     os.path.join(train_path, "sequences"),
     os.path.join(train_path, "labels"),
@@ -62,11 +63,11 @@ val_dataset = OpenEDSDataset(
     input_output_lengths=(5, 2),
     device="cuda",
 )
-val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=32, shuffle=True)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=8, shuffle=True)
 
 # Define your optimizer and loss function
-model = CNNLSTMModelV2(
-    "quanteyes/training/saved/SimpleCNN_250.pth",
+model = QuantizedCNNLSTMModelV2(
+    "quanteyes/training/saved/SimpleQuantizedCNN_1000.pth",
     train_backbone=False,
     seq_len=5,
     output_len=2,

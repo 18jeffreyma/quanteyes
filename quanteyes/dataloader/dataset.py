@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 from torchvision import io
 
 
-@lru_cache(maxsize=32)
+@lru_cache(maxsize=16)
 def read_image_to_tensor(image_path: str, device: str = "cpu") -> torch.Tensor:
     # Read image to PyTorch tensor
     img = io.read_image(image_path).to(device)
