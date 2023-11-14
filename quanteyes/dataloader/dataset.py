@@ -9,10 +9,9 @@ from torch.utils.data import Dataset
 from torchvision import io
 
 
-@lru_cache(maxsize=16)
 def read_image_to_tensor(image_path: str, device: str = "cpu") -> torch.Tensor:
     # Read image to PyTorch tensor
-    img = io.read_image(image_path).to(device)
+    img = io.read_image(image_path)
 
     # Normalize to [0, 1]
     img = img.float() / 255.0
@@ -136,7 +135,7 @@ class OpenEDSDataset(Dataset):
         if self.inference:
             return data
 
-        labels = torch.Tensor(self.labels[idx]).to(device=self.device)
+        labels = torch.Tensor(self.labels[idx])
         return data, labels
 
 
