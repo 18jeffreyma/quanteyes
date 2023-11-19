@@ -5,9 +5,8 @@ def load_and_decode_image(file_path):
     # Read the raw image data
     image = tf.io.read_file(file_path)
     # Decode the image (supports various image formats)
-    image = tf.image.decode_png(
-        image, channels=1
-    )  # You may need to adjust the 'channels' parameter based on your images
+    image = tf.image.decode_png(image, channels=1)
+    # You may need to adjust the 'channels' parameter based on your images
     # Perform any additional preprocessing as needed
     # For example, you might want to resize the image
     # image = tf.image.resize(image, [640, 400])
@@ -26,12 +25,17 @@ def read_label_for_sequence(label_file):
     return tf.strings.to_number(vector_string_first_removed, tf.float32)
 
 
-def get_zipped_dataset(path):
+def get_zipped_dataset(path, train=True):
     image_paths = tf.data.Dataset.list_files(
         f"{path}/sequences/*/*.png", shuffle=False
     ).map(load_and_decode_image)
     labels = (
-        tf.data.Dataset.list_files(f"{path}/labels/*.txt", shuffle=False)
+        # tf.data.Dataset.list_files(f"{path}/labels/*.txt", shuffle=False)
+        # NOTE: This is a hack since the label file isn't properly copied over.
+        tf.data.Dataset.list_files(
+            f"/data/openEDS2020-GazePrediction-2bit/{'train' if train else 'validation'}/labels/*.txt",
+            shuffle=False,
+        )
         .map(read_label_for_sequence)
         .flat_map(tf.data.Dataset.from_tensor_slices)
     )
