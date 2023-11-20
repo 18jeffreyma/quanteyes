@@ -66,7 +66,9 @@ for dirname, _, filenames in os.walk("./model_export"):
             y_pred = pred.astype(np.float32)
             y_true = np.squeeze(target.numpy().T).astype(np.float32)
 
-            avg_cosine_similarity += tf.keras.losses.cosine_similarity(y_true, y_pred)
+            avg_cosine_similarity += -1 * tf.keras.losses.cosine_similarity(
+                y_true, y_pred
+            )
             mse += np.sum(np.square(y_true - y_pred))
 
         mse /= num_examples

@@ -4,6 +4,10 @@ import tensorflow as tf
 def load_and_decode_image(file_path):
     # Read the raw image data
     image = tf.io.read_file(file_path)
+    
+    # Log the file path and image shape (optional)
+    tf.print(file_path, tf.shape(image))
+    
     # Decode the image (supports various image formats)
     image = tf.image.decode_png(image, channels=1)
     # You may need to adjust the 'channels' parameter based on your images
