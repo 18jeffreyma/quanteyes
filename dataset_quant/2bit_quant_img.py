@@ -257,8 +257,15 @@ def quantize(datatype_dir, directory, quant_scheme='otsu_1bit', bits=2):
 			os.system(f'mkdir -p {out_temp_dir}')
 		out_img_path = os.path.join(out_temp_dir, img_file)
 		if os.path.isfile(out_img_path):
-			print('skipping', out_img_path)
-			continue
+			try:
+				img = Image.open(out_img_path)
+				img.verify()
+				img.close()
+				print('skipping', out_img_path)
+				continue
+			except:
+				print('corrupt', out_img_path)
+				os.system(f'rm {out_img_path}')
 
 		img_path = os.path.join(datatype_dir, directory, img_file)
 		img = io.read_image(img_path).to(torch.uint8)[0]
