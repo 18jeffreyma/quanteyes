@@ -15,6 +15,9 @@ logging.basicConfig(level=logging.DEBUG)
 def train(model, optimizer, criterion, train_loader, test_loader):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
+        data = data.to("cuda")
+        target = target.to("cuda")
+
         optimizer.zero_grad()
         output = model(data)
         loss = criterion(output, target)
@@ -43,7 +46,12 @@ def train(model, optimizer, criterion, train_loader, test_loader):
 
 
 # Define your data loading and preprocessing
-base_path = "/data/openEDS2020-GazePrediction-2bit"
+# base_path = "/data/openEDS2020-GazePrediction-2bit"
+# base_path = "/data/openEDS2020-GazePrediction-2bit-octree"
+# base_path = "/data/openEDS2020-GazePrediction-1bit-otsu"
+base_path = "/data/openEDS2020-GazePrediction-1bit-edge"
+
+
 train_path = f"{base_path}/train"
 train_dataset = OpenEDSDataset(
     os.path.join(train_path, "sequences"),
@@ -51,7 +59,9 @@ train_dataset = OpenEDSDataset(
     inference=False,
     device="cuda",
 )
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True)
+train_loader = torch.utils.data.DataLoader(
+    train_dataset, batch_size=16, shuffle=True, num_workers=2
+)
 
 val_path = f"{base_path}/validation"
 val_dataset = OpenEDSDataset(
@@ -60,7 +70,9 @@ val_dataset = OpenEDSDataset(
     inference=False,
     device="cuda",
 )
-val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=16, shuffle=True)
+val_loader = torch.utils.data.DataLoader(
+    val_dataset, batch_size=16, shuffle=True, num_workers=2
+)
 
 # Define your optimizer and loss function
 model = SimpleQuantizedCNN().to("cuda")
