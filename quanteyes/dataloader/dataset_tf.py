@@ -6,7 +6,7 @@ def load_and_decode_image(file_path):
     image = tf.io.read_file(file_path)
     
     # Log the file path and image shape (optional)
-    tf.print(file_path, tf.shape(image))
+    # tf.print(file_path, tf.shape(image))
     
     # Decode the image (supports various image formats)
     image = tf.image.decode_png(image, channels=1)
@@ -37,7 +37,7 @@ def get_zipped_dataset(path, train=True):
         # tf.data.Dataset.list_files(f"{path}/labels/*.txt", shuffle=False)
         # NOTE: This is a hack since the label file isn't properly copied over.
         tf.data.Dataset.list_files(
-            f"/data/openEDS2020-GazePrediction-2bit/{'train' if train else 'validation'}/labels/*.txt",
+            f"/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction-2bit-octree/{'train' if train else 'validation'}/labels/*.txt",
             shuffle=False,
         )
         .map(read_label_for_sequence)
