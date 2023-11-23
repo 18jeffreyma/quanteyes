@@ -150,4 +150,4 @@ if __name__ == "__main__":
     )
 
     image, label = dataset[0]
-    print(image.shape, label.shape)
+    # print(image.shape, label.shape)

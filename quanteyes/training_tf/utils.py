@@ -50,6 +50,7 @@ DATA_PATHS = {
     #"2bit-octree": "/data/openEDS2020-GazePrediction-2bit-octree",
     #"1bit-edge": "/data/openEDS2020-GazePrediction-1bit-edge",
     "1bit-otsu": "/data/openEDS2020-GazePrediction-1bit-otsu",
+    # '1but-otsu': "/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction-1bit-otsu"
 }
 
 QUANTIZATIONS = {
