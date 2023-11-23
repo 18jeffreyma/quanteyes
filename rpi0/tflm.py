@@ -3,12 +3,7 @@ import re
 
 import numpy as np
 from PIL import Image
-# import tensorflow as tf
 from tflite_micro_runtime.interpreter import Interpreter as tflm_Interpreter
-# tflm_Interpreter = tf.lite.Interpreter
-
-from quanteyes.dataloader.dataset_tf import get_zipped_dataset
-from quanteyes.training_tf.utils import DATA_PATHS
 
 tf_model_path = '../model_export/q-int8_d-2bit-octree.tflite'
 interpreter = tflm_Interpreter(tf_model_path)
