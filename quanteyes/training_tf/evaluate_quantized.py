@@ -46,6 +46,7 @@ for dirname, _, filenames in os.walk("./model_export"):
         for input_data, target in val_dataset.batch(1).take(num_examples):
             # If required, quantize the input layer (from float to integer)
             img_array = input_data.numpy()
+            print("sum of input: ", np.sum(img_array))
 
             input_scale, input_zero_point = input_details["quantization"]
             if (input_scale, input_zero_point) != (0.0, 0):
@@ -55,6 +56,7 @@ for dirname, _, filenames in os.walk("./model_export"):
             interpreter.set_tensor(input_tensor_index, img_array)
             interpreter.invoke()
             pred = output[0]
+            # print("pred", pred)
 
             # If required, dequantized the output layer (from integer to float)
             output_scale, output_zero_point = output_details["quantization"]
@@ -65,6 +67,7 @@ for dirname, _, filenames in os.walk("./model_export"):
             # Compute cosine similarity.
             y_pred = pred.astype(np.float32)
             y_true = np.squeeze(target.numpy().T).astype(np.float32)
+            print(f"true: {y_true}, pred: {y_pred} \n")
 
             avg_cosine_similarity += -1 * tf.keras.losses.cosine_similarity(
                 y_true, y_pred

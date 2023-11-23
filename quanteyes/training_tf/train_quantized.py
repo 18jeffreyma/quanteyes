@@ -9,26 +9,42 @@ from utils import DATA_PATHS, QUANTIZATIONS
 from quanteyes.dataloader.dataset_tf import get_zipped_dataset
 
 for d_name, base_path in DATA_PATHS.items():
-    train_dataset = get_zipped_dataset(f"{base_path}/train", train=True).shuffle(1000)
+    train_dataset = get_zipped_dataset(f"{base_path}/train", train=True).shuffle(10000)
     val_dataset = get_zipped_dataset(f"{base_path}/validation", train=False).shuffle(
-        1000
+        10000
     )
 
-    # Define your model
+    # Define your model with dropout.
     model = keras.Sequential(
         [
             keras.layers.Conv2D(
-                16,
+                32,
                 (3, 3),
-                activation="relu",
                 input_shape=(200, 320, 1),
                 padding="same",
             ),
+            keras.layers.BatchNormalization(),
+            keras.layers.Activation("relu"),
+            keras.layers.Conv2D(
+                32,
+                (3, 3),
+                padding="same",
+            ),
+            keras.layers.BatchNormalization(),
+            keras.layers.Activation("relu"),
             keras.layers.MaxPooling2D((2, 2)),
-            keras.layers.Conv2D(32, (3, 3), activation="relu", padding="same"),
+            keras.layers.Dropout(0.5),
+            keras.layers.Conv2D(64, (3, 3), padding="same"),
+            keras.layers.BatchNormalization(),
+            keras.layers.Activation("relu"),
+            keras.layers.Conv2D(64, (3, 3), padding="same"),
+            keras.layers.BatchNormalization(),
+            keras.layers.Activation("relu"),
             keras.layers.MaxPooling2D((2, 2)),
+            keras.layers.Dropout(0.5),
             keras.layers.Flatten(),
-            keras.layers.Dense(64, activation="relu"),
+            keras.layers.Dense(256, activation="relu"),
+            keras.layers.Dropout(0.5),
             keras.layers.Dense(3),
         ]
     )
@@ -41,20 +57,28 @@ for d_name, base_path in DATA_PATHS.items():
     # `quantize_model` requires a recompile.
     q_aware_model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5),
-        loss=tf.keras.losses.CosineSimilarity(
-            axis=1, reduction=tf.keras.losses.Reduction.SUM
-        ),
+        # loss=tf.keras.losses.CosineSimilarity(
+        #     axis=1, reduction=tf.keras.losses.Reduction.SUM
+        # ),
+        loss=tf.keras.losses.MeanSquaredError(),
         metrics=["mse", "cosine_similarity"],
     )
 
-    q_aware_model.summary()
+    # q_aware_model.summary()
 
     q_aware_model.fit(
-        train_dataset.batch(32).repeat(10),
-        epochs=10,
-        steps_per_epoch=1000,
+        train_dataset.batch(32).repeat(20),
+        epochs=40,
+        steps_per_epoch=2000,
         validation_data=val_dataset.batch(32).take(100),
     )
+    
+    # Take first element of val_dataset and perform prediction.
+    for input_data, target in val_dataset.batch(1).take(5):
+        print("input_data", input_data)
+        print("target", target)
+        pred = q_aware_model.predict(input_data)
+        print("pred", pred)
 
     for q_name, quantization in QUANTIZATIONS.items():
         converter = quantization(q_aware_model, train_dataset)

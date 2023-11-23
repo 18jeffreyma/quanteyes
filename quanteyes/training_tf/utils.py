@@ -47,8 +47,8 @@ def int8_quantize(q_aware_model, train_dataset, n=100):
 DATA_PATHS = {
     # "original": "/data/openEDS2020-GazePrediction",
     # "2bit": "/data/openEDS2020-GazePrediction-2bit",
-    # "2bit-octree": "/data/openEDS2020-GazePrediction-2bit-octree",
-    # "1bit-edge": "/data/openEDS2020-GazePrediction-1bit-edge",
+    #"2bit-octree": "/data/openEDS2020-GazePrediction-2bit-octree",
+    #"1bit-edge": "/data/openEDS2020-GazePrediction-1bit-edge",
     "1bit-otsu": "/data/openEDS2020-GazePrediction-1bit-otsu",
 }
 

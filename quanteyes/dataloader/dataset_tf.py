@@ -6,7 +6,6 @@ def load_and_decode_image(file_path):
     image = tf.io.read_file(file_path)
     
     # Log the file path and image shape (optional)
-    tf.print(file_path, tf.shape(image))
     
     # Decode the image (supports various image formats)
     image = tf.image.decode_png(image, channels=1)
