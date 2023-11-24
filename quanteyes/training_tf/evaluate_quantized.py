@@ -24,9 +24,12 @@ for dirname, _, filenames in os.walk("./model_export"):
         else:
             raise Exception(f"Could not parse filename: {filename}")
 
-        val_dataset = get_zipped_dataset(
-            f"{DATA_PATHS[data_width]}/validation", train=False
-        ).shuffle(1000)
+        try:
+            val_dataset = get_zipped_dataset(
+                f"{DATA_PATHS[data_width]}/validation", train=False
+            ).shuffle(1000)
+        except Exception:
+            continue
 
         interpreter = tf.lite.Interpreter(model_path=os.path.join(dirname, filename))
         interpreter.allocate_tensors()

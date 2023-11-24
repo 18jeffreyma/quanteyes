@@ -37,7 +37,7 @@ def get_zipped_dataset(path, train=True):
         # tf.data.Dataset.list_files(f"{path}/labels/*.txt", shuffle=False)
         # NOTE: This is a hack since the label file isn't properly copied over.
         tf.data.Dataset.list_files(
-            f"/mnt/sdb/data/Openedsdata2020/openEDS2020-GazePrediction-2bit-octree/{'train' if train else 'validation'}/labels/*.txt",
+            f"/data/openEDS2020-GazePrediction-2bit-octree/{'train' if train else 'validation'}/labels/*.txt",
             shuffle=False,
         )
         .map(read_label_for_sequence)
