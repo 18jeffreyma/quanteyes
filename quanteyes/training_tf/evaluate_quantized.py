@@ -39,7 +39,6 @@ for dirname, _, filenames in os.walk("./model_export"):
         output_details = interpreter.get_output_details()[0]
 
         input_tensor_index = input_details["index"]
-        output = interpreter.get_tensor(output_details["index"])
 
         mse = 0.0
         avg_cosine_similarity = 0.0
@@ -58,6 +57,7 @@ for dirname, _, filenames in os.walk("./model_export"):
 
             interpreter.set_tensor(input_tensor_index, img_array)
             interpreter.invoke()
+            output = interpreter.get_tensor(output_details["index"])
             pred = output[0]
             # print("pred", pred)
 
