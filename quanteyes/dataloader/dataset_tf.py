@@ -10,6 +10,7 @@ def load_and_decode_image(file_path):
     
     # Decode the image (supports various image formats)
     image = tf.image.decode_png(image, channels=1)
+    image = tf.reshape(image, [1, 400, 640, 1])
     # You may need to adjust the 'channels' parameter based on your images
     # Perform any additional preprocessing as needed
     # For example, you might want to resize the image
@@ -17,7 +18,15 @@ def load_and_decode_image(file_path):
     # Normalize pixel values to be in the range [0, 1]
     image = tf.cast(image, tf.float32) / 255.0
 
-    return tf.image.resize(image, [200, 320])
+    # For image of [height, width, channels], perform 4x4 max pooling,
+    # resulting in an output image of [height/4, width/4, channels]
+    print("image shape", image.shape)
+    
+    pool = tf.keras.layers.MaxPooling2D(pool_size=(4, 4), strides=(4, 4), padding='valid')
+    
+    pooled_image = tf.reshape(pool(image), [100, 160, 1])
+    
+    return pooled_image
 
 
 def read_label_for_sequence(label_file):

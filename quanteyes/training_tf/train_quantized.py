@@ -20,11 +20,12 @@ for d_name, base_path in DATA_PATHS.items():
             keras.layers.Conv2D(
                 32,
                 (3, 3),
-                input_shape=(200, 320, 1),
+                input_shape=(100, 160, 1),
                 padding="same",
             ),
             keras.layers.BatchNormalization(),
             keras.layers.Activation("relu"),
+            keras.layers.MaxPooling2D((2, 2)),
             keras.layers.Conv2D(
                 32,
                 (3, 3),
@@ -33,7 +34,8 @@ for d_name, base_path in DATA_PATHS.items():
             keras.layers.BatchNormalization(),
             keras.layers.Activation("relu"),
             keras.layers.MaxPooling2D((2, 2)),
-            keras.layers.Dropout(0.5),
+            keras.layers.Dropout(0.3),
+    
             keras.layers.Conv2D(64, (3, 3), padding="same"),
             keras.layers.BatchNormalization(),
             keras.layers.Activation("relu"),
@@ -42,6 +44,16 @@ for d_name, base_path in DATA_PATHS.items():
             keras.layers.Activation("relu"),
             keras.layers.MaxPooling2D((2, 2)),
             keras.layers.Dropout(0.5),
+    
+            keras.layers.Conv2D(128, (3, 3), padding="same"),
+            keras.layers.BatchNormalization(),
+            keras.layers.Activation("relu"),
+            keras.layers.Conv2D(128, (3, 3), padding="same"),
+            keras.layers.BatchNormalization(),
+            keras.layers.Activation("relu"),
+            keras.layers.MaxPooling2D((2, 2)),
+            keras.layers.Dropout(0.5),
+
             keras.layers.Flatten(),
             keras.layers.Dense(256, activation="relu"),
             keras.layers.Dropout(0.5),
@@ -52,6 +64,7 @@ for d_name, base_path in DATA_PATHS.items():
     quantize_model = tfmot.quantization.keras.quantize_model
 
     # q_aware stands for for quantization aware.
+    # q_aware_model = quantize_model(model)
     q_aware_model = quantize_model(model)
 
     # `quantize_model` requires a recompile.

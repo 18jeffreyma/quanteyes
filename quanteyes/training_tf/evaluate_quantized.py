@@ -48,7 +48,7 @@ for dirname, _, filenames in os.walk("./model_export"):
         for input_data, target in val_dataset.batch(1).take(num_examples):
             # If required, quantize the input layer (from float to integer)
             img_array = input_data.numpy()
-            print("sum of input: ", np.sum(img_array))
+            # print("sum of input: ", np.sum(img_array))
 
             input_scale, input_zero_point = input_details["quantization"]
             if (input_scale, input_zero_point) != (0.0, 0):
@@ -70,7 +70,7 @@ for dirname, _, filenames in os.walk("./model_export"):
             # Compute cosine similarity.
             y_pred = pred.astype(np.float32)
             y_true = np.squeeze(target.numpy().T).astype(np.float32)
-            print(f"true: {y_true}, pred: {y_pred} \n")
+            # print(f"true: {y_true}, pred: {y_pred} \n")
 
             avg_cosine_similarity += -1 * tf.keras.losses.cosine_similarity(
                 y_true, y_pred

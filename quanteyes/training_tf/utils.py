@@ -4,6 +4,7 @@ import tensorflow as tf
 def float32_quantize(q_aware_model, train_dataset, n=100):
     converter = tf.lite.TFLiteConverter.from_keras_model(q_aware_model)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    converter.target_spec.supported_types = [tf.float32]
 
     def representative_dataset():
         for data in train_dataset.batch(1).take(n):
@@ -31,6 +32,7 @@ def int8_quantize(q_aware_model, train_dataset, n=100):
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     # Ensure that if any ops can't be quantized, the converter throws an error
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+    converter.target_spec.supported_types = [tf.int8]
 
     # Set the input and output tensors to uint8 (APIs added in r2.3)
     converter.inference_input_type = tf.int8
