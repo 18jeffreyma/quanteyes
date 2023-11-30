@@ -39,15 +39,10 @@ def main():
 	start = time.time()
 	for img_array in images:
 
-		input_scale, input_zero_point = input_details["quantization"]
-		if (input_scale, input_zero_point) != (0.0, 0):
-			img_array = np.multiply(img_array, 1.0 / input_scale) + input_zero_point
-		img_array = img_array.astype(input_details["dtype"])
-
 		interpreter.set_tensor(input_tensor_index, img_array)
 		interpreter.invoke()
+		output = interpreter.get_tensor(output_details["index"])
 		pred = output[0]
-
 
 		# If required, dequantized the output layer (from integer to float)
 		output_scale, output_zero_point = output_details["quantization"]
@@ -57,7 +52,7 @@ def main():
 
 		# Compute cosine similarity.
 		y_pred = pred.astype(np.float32)
-		# print(output, pred)
+		print(y_pred)
 	end = time.time()
 	elapsed = end - start
 	print('elapsed time: ', elapsed)
