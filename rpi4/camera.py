@@ -53,7 +53,7 @@ class EyeTracker():
 		grey = np.expand_dims(grey, axis=0)
 		return np.expand_dims(grey, axis=-1)
 
-	def get_prediction(self, input_data):
+	def make_prediction(self, input_data):
 		if (self.input_scale, self.input_zero_point) != (0.0, 0):
 			input_data = np.multiply(input_data, 1.0 / self.input_scale) + self.input_zero_point
 		input_data = input_data.astype(self.input_details["dtype"])
@@ -81,7 +81,7 @@ class EyeTracker():
 		self.start = time.time()
 		while True:
 			input_data = self.get_input()
-			prediction = self.get_prediction(input_data)
+			prediction = self.make_prediction(input_data)
 			# print(prediction)
 
 			frames += 1
