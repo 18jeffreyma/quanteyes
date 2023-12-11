@@ -223,6 +223,7 @@ def quantize(datatype_dir, directory, quant_scheme='otsu_1bit', bits=2):
 
 		img_path = os.path.join(datatype_dir, directory, img_file)
 		img = io.read_image(img_path).to(torch.uint8)[0]
+		img_numpy = plt.imread(img_path)
 
 		match quant_scheme:
 			case 'uniform':
@@ -244,7 +245,7 @@ def quantize(datatype_dir, directory, quant_scheme='otsu_1bit', bits=2):
 				img = canny_quant(img)
 
 			case 'min_var_quant':
-				img = min_var_quant(img, bits=bits)
+				img = min_var_quant(img_numpy, bits=bits)
 				
 			case 'otsu_1bit':
 				img = otsu_1bit(img)
